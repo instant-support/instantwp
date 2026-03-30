@@ -1,0 +1,73 @@
+services:
+  app:
+    image: instantwp:latest
+    container_name: instantwp-app
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    networks:
+      - instantwp
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - MAX_UPLOAD_SIZE= 100M
+      - TZ= Asia/Kolkata
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads:rw
+      - ./config.toml:/app/config.toml:ro
+      - /etc/localtime:/etc/localtime:ro
+    command: ["./Instantwp", "server", "-migrate", "-config", "/app/config.toml"]
+
+  db:
+    image: postgres:17-alpine
+    container_name: instantwp-db
+    restart: unless-stopped
+    networks:
+      - instantwp
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-Instantwp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Instantwp}
+      POSTGRES_DB: ${POSTGRES_DB:-Instantwp}
+      TZ: Asia/Kolkata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-Instantwp} -d ${POSTGRES_DB:-Instantwp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+
+  redis:
+    image: redis:7-alpine
+    container_name: instantwp-redis
+    restart: unless-stopped
+    networks:
+      - instantwp
+    ports:
+      - "127.0.0.1:6379:6379"
+    environment:
+      TZ: Asia/Kolkata
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
+      - /etc/localtime:/etc/localtime:ro
+
+networks:
+  instantwp:
+
+volumes:
+  postgres-data:
+  redis-data:
+
