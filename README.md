@@ -50,6 +50,8 @@ Modern, open-source WhatsApp Business Platform. Single binary app.
 
 ## Installation
 
+Before starting a fresh installation, set your administrator email and a strong, unique password in the `[default_admin]` section of the `config.toml` file used by the server. The migration creates the administrator from those settings. If a user with that email already exists, changing the password in the configuration does not reset their password.
+
 ### Docker
 
 The latest image is available on Docker Hub at [`instant-support/instantwp:latest`](https://hub.docker.com/r/instant-support/instantwp)
@@ -68,7 +70,7 @@ cp config.example.toml config.toml
 docker compose up -d
 ```
 
-Go to `http://localhost:8080` and login with `admin@instantsupport.co.in` / `admin`
+Open `http://localhost:8080` and sign in with the administrator credentials you configured.
 
 __________________
 
@@ -84,7 +86,7 @@ cp config.example.toml config.toml
 ./instantwp server -migrate
 ```
 
-Go to `http://localhost:8080` and login with `admin@instantsupport.co.in` / `admin`
+Open `http://localhost:8080` and sign in with the administrator credentials you configured.
 
 __________________
 
@@ -93,6 +95,8 @@ __________________
 ```bash
 git clone https://github.com/instant-support/instantwp.git
 cd instantwp
+
+# Edit [default_admin] in config.toml before starting the server
 
 # Production build (single binary with embedded frontend)
 make build-prod
